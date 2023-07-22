@@ -96,12 +96,80 @@ function getStudentByNum(num) {
   });
 };
 
+function addStudent(studentData) {
+  return new Promise((resolve, reject) => {
+    if (typeof studentData.TA === 'undefined') {
+      studentData.TA = false;
+    } else {
+      studentData.TA = true;
+    }
+
+    studentData.studentNum = dataCollection.students.length + 1;
+    dataCollection.students.push(studentData);
+
+    resolve();
+  });
+}
+
+function getCourseById(id) {
+  return new Promise(async(resolve, reject) => {
+    const courses = await this.getCourses();
+    const course = courses.find((course) => course.courseId === id);
+    if (course) {
+      resolve(course);
+    } else {
+      reject(new Error('query returned 0 results'));
+    }
+  });
+}
+async function updateStudent(studentData) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const student_s = await this.getAllStudents();
+      const studentIndex = student_s.findIndex(
+        (student) => student.studentNum === parseInt(studentData.studentNum)
+      );
+      if (studentIndex === -1) {
+        reject(new Error('Student not found'));
+      } else {
+        // Handle the "TA" checkbox data
+        studentData.TA = studentData.TA === 'on'; // Convert 'on' to true, 'undefined' to false
+
+        // Update the student with the new data
+        student_s[studentIndex] = {
+          ...student_s[studentIndex],
+          firstName: studentData.firstName,
+          lastName: studentData.lastName,
+          email: studentData.email,
+          addressStreet: studentData.addressStreet,
+          addressCity: studentData.addressCity,
+          addressProvince: studentData.addressProvince,
+          TA: studentData.TA,
+          status: studentData.status,
+          course: studentData.course,
+        };
+
+        resolve();
+      }
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
+
+
+
+
 module.exports = {
   initialize,
   getAllStudents,
   getTAs,
   getCourses,
   getStudentsByCourse,
-  getStudentByNum
+  getStudentByNum,
+  addStudent,
+  getCourseById,
+  updateStudent
+  
   
 };
